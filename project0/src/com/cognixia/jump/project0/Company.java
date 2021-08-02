@@ -3,8 +3,13 @@
  */
 package com.cognixia.jump.project0;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Hashtable;
+import java.util.List;
+
 import com.cognixia.jump.project0.Employee;
 
 /**
@@ -60,7 +65,13 @@ public class Company implements Serializable {
 		this.employees = new Hashtable<Integer, Employee>();
 		this.departments = Department.values();
 	}
-
+	
+	private List<Employee> readEmployeeTextFile(String path) throws IOException {
+		List<String> lines = Files.readAllLines(Paths.get(path));
+		// TODO: Finish this up
+		return null;
+	}
+	
 	/**
 	 * @param args command-line arguments. Not necessary for this program.
 	 */
