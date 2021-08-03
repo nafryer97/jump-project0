@@ -9,7 +9,11 @@ import java.util.Random;
 import com.cognixia.jump.project0.Company.Department;
 
 /**
- * @author noah
+ * @author Noah Fryer
+ * 
+ * Represents an individual record in the company employee log. 
+ * Contains fields for employee information and methods to access 
+ * and mutate those fields.
  *
  */
 public class Employee implements Serializable, Comparable<Employee> {
@@ -21,6 +25,9 @@ public class Employee implements Serializable, Comparable<Employee> {
 	private Department department;
 	private int salary;
 	
+	/**
+	 * Default Constructor
+	 */
 	public Employee() {
 		this.firstName = "Default";
 		this.lastName = "Default";
@@ -30,10 +37,25 @@ public class Employee implements Serializable, Comparable<Employee> {
 	}
 	
 	/**
-	 * 
-	 * @param firstName The employee's given name
-	 * @param lastName The employee's family name (surname)
-	 * @param ssn The employee's social security number
+	 * Instantiates an Employee with the given ID
+	 * @param id
+	 */
+	public Employee(int id) {
+		this.firstName = "Default";
+		this.lastName = "Default";
+		this.idNum = id;
+		this.department = Department.DEFAULT;
+		this.salary = 0;
+	}
+	
+	/**
+	 * Instantiates a new object with the given information in
+	 * the appropriate fields.
+	 * @param firstName
+	 * @param lastName
+	 * @param idNum
+	 * @param department
+	 * @param salary
 	 */
 	public Employee(String firstName, String lastName, 
 			int idNum, Department department, int salary) {
@@ -47,11 +69,11 @@ public class Employee implements Serializable, Comparable<Employee> {
 	public String getFirstName() {
 		return this.firstName;
 	}
-	
+
 	public String getLastName() {
 		return this.lastName;
 	}
-	
+
 	public int getID() {
 		return this.idNum;
 	}
@@ -70,6 +92,18 @@ public class Employee implements Serializable, Comparable<Employee> {
 	
 	public void setLastName(String name) {
 		this.lastName = name;
+	}
+	
+	public void setID(int id) {
+		this.idNum = id;
+	}
+	
+	public void setDepartment(Department d) {
+		this.department = d;
+	}
+	
+	public void setSalary(int salary) {
+		this.salary = salary;
 	}
 	
 	@Override

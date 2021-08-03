@@ -15,10 +15,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Scanner;
-import java.util.Set;
 
 import com.cognixia.jump.project0.Employee;
 
@@ -34,6 +32,12 @@ import com.cognixia.jump.project0.Employee;
  */
 public class Company implements Serializable {
 	
+	/**
+	 * @author Noah Fryer
+	 * 
+	 * Enumeration of all the departments in the company. Enables
+	 * easy search and comparison.
+	 */
 	enum Department implements Serializable {
 		INFORMATION_TECHNOLOGY,
 		SALES,
@@ -80,61 +84,28 @@ public class Company implements Serializable {
 	}
 	
 	private static final long serialVersionUID = 10l;
-	private final LinkedHashSet<Employee> employees;
-	private final Department[] departments;
+	private final ArrayList<Employee> employees;
 
 	/**
 	 * Default Constructor
 	 */
 	public Company() {
-		this.employees = new LinkedHashSet<Employee>();
-		this.departments = Department.values();
-	}
-	
-	/**
-	 * Adds a single employee entry
-	 * @param e
-	 */
-	public void addEmployee(Employee e) {
-		this.employees.add(e);
-	}
-	
-	/**
-	 * Adds new employee entries from the given set.
-	 * 
-	 * @param s
-	 */
-	public void addEmployees(Set<Employee> s) {
-		this.employees.addAll(s);
+		this.employees = new ArrayList<Employee>();
 	}
 	
 	/**
 	 * Searches for an Employee object with a matching ID.
-	 * 
+	 * Assumes that the internal employee collection is sorted.
 	 * @param id
 	 * @return an Employee object, or null if there are no matches
 	 */
 	public Employee searchID(int id) {
-		for (Employee e: this.employees) {
-			if (e.getID() == id) {
-				return e;
-			}
-		}
+		int index = Collections.binarySearch(this.employees, new Employee(id));
 		
-		return null;
-	}
-	
-	/**
-	 * Removes an employee entry from memory.
-	 * 
-	 * @param id
-	 */
-	public void removeEmployee(int id) {
-		for (Employee e: this.employees) {
-			if (e.getID() == id) {
-				this.employees.remove(e);
-				break;
-			}
+		if (index >= 0) {
+			return this.employees.get(index);
+		} else {
+			return null;
 		}
 	}
 	
@@ -146,7 +117,7 @@ public class Company implements Serializable {
 	 */
 	public Object[] searchName(String name) {
 		Object[] result = this.employees.stream().filter(e -> 
-		e.getFirstName().equals(name)
+		e.getFirstName().equals(name) || e.getLastName().equals(name)
 		).toArray();
 		
 		return result;
@@ -172,8 +143,55 @@ public class Company implements Serializable {
 	 * 
 	 * @return LinkedHashSet<Employee>
 	 */
-	public LinkedHashSet<Employee> getEmployeeSet() {
+	public ArrayList<Employee> getEmployeeSet() {
 		return this.employees;
+	}
+	
+	/**
+	 * Adds a single employee entry. Assumes that the 
+	 * underlying collection is sorted.
+	 * @param e
+	 */
+	public void insertEmployee(Employee e) {
+		int index = Collections.binarySearch(this.employees, e);
+		
+		if (index <= 0) {
+			this.employees.add( -(index + 1), e);
+		} else {
+			System.err.println("Duplicate ID entries are not allowed.");
+		}
+	}
+	
+	/**
+	 * Adds new employee entries from the given set.
+	 * 
+	 * @param s
+	 */
+	public void insertEmployees(List<Employee> list) {
+		int index;
+		for (Employee e : list) {
+			index = Collections.binarySearch(this.employees, e);
+			if (index <= 0) {
+				this.employees.add( -(index + 1), e);
+			} else {
+				System.err.println(e.toString() + " was not added. Duplicate ID.");
+			}
+		}
+	}
+	
+	/**
+	 * Removes an employee entry from memory.
+	 * Assumes that the internal employee collection is sorted.
+	 * @param id
+	 */
+	public void removeEmployee(int id) {
+		int index = Collections.binarySearch(this.employees, new Employee(id));
+		
+		if (index >= 0) {
+			this.employees.remove(index);
+		} else {
+			System.err.println(id + " does not match any records.");
+		}
 	}
 	
 	/**
@@ -233,6 +251,7 @@ public class Company implements Serializable {
 	 * one employee per line
 	 * 
 	 * @param path
+	 * @throws IOException
 	 */
 	public void writeEmployeeTextFile(String path) throws IOException {
 		FileWriter file = new FileWriter(path);
@@ -261,9 +280,9 @@ public class Company implements Serializable {
 	public static void main(String[] args) {
 		Company company = new Company();
 		
-		int input = 10;
+		int input = 99;
 		
-		while(input != 0) {
+		while(true) {
 			Scanner scnr = new Scanner(System.in);
 			System.out.println("Commands:");
 			System.out.println("1 for reading text file, 2 reading object file, "
@@ -328,7 +347,7 @@ public class Company implements Serializable {
 				System.out.println("Enter First Name, Last Name, "
 						+ "ID, Department, and Salary:");
 				String[] info = scnr.nextLine().split(",");
-				company.addEmployee(new Employee(
+				company.insertEmployee(new Employee(
 						info[0], 
 						info[1], 
 						Integer.parseInt(info[2]),
@@ -344,6 +363,7 @@ public class Company implements Serializable {
 				company.printAllEmployees();
 				break;
 			case 11:
+				scnr.close();
 				return;
 			default:
 				System.err.println("Invalid Argument. Please try again.");
