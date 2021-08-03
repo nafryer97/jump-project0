@@ -29,3 +29,7 @@ local.properties
 
 # macOS
 .DS_Store
+
+tags
+*.ser
+*out*
