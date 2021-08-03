@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import com.cognixia.jump.project0.Employee;
+import com.cognixia.jump.project0.DuplicateEntryException;
 
 /**
  * @author Noah Fryer
@@ -117,7 +118,8 @@ public class Company implements Serializable {
 	 */
 	public Object[] searchName(String name) {
 		Object[] result = this.employees.stream().filter(e -> 
-		e.getFirstName().equals(name) || e.getLastName().equals(name)
+		e.getFirstName().equalsIgnoreCase(name) 
+		|| e.getLastName().equalsIgnoreCase(name)
 		).toArray();
 		
 		return result;
@@ -152,13 +154,14 @@ public class Company implements Serializable {
 	 * underlying collection is sorted.
 	 * @param e
 	 */
-	public void insertEmployee(Employee e) {
+	public void insertEmployee(Employee e) throws DuplicateEntryException {
 		int index = Collections.binarySearch(this.employees, e);
 		
-		if (index <= 0) {
-			this.employees.add( -(index + 1), e);
+		if (index < 0) {
+			this.employees.add( (-(index) - 1), e);
 		} else {
-			System.err.println("Duplicate ID entries are not allowed.");
+			throw new DuplicateEntryException(e.toString() + " was not added. "
+					+ "Duplicate ID entries are not allowed.");
 		}
 	}
 	
@@ -168,13 +171,11 @@ public class Company implements Serializable {
 	 * @param s
 	 */
 	public void insertEmployees(List<Employee> list) {
-		int index;
 		for (Employee e : list) {
-			index = Collections.binarySearch(this.employees, e);
-			if (index <= 0) {
-				this.employees.add( -(index + 1), e);
-			} else {
-				System.err.println(e.toString() + " was not added. Duplicate ID.");
+			try {
+			insertEmployee(e);
+			} catch (DuplicateEntryException exception) {
+				System.err.println(exception.getMessage());
 			}
 		}
 	}
@@ -220,7 +221,7 @@ public class Company implements Serializable {
 		FileInputStream file = new FileInputStream(path);
 		ObjectInputStream in = new ObjectInputStream(file);
 		Company temp = (Company) in.readObject();
-		this.employees.addAll(temp.getEmployeeSet());
+		this.insertEmployees(temp.getEmployeeSet());
 		in.close();
 		file.close();
 	}
@@ -235,7 +236,9 @@ public class Company implements Serializable {
 		
 		for (String line : lines) {
 			String[] tokens = line.split(",");
-			this.employees.add(
+			
+			try {
+			this.insertEmployee(
 					new Employee(
 							tokens[0],
 							tokens[1],
@@ -243,6 +246,9 @@ public class Company implements Serializable {
 							Department.parseDepartment(tokens[3]),
 							Integer.parseInt(tokens[4])
 					));
+			} catch (DuplicateEntryException e) {
+				System.err.println(e.getMessage());
+			}
 		}
 	}
 	
@@ -285,10 +291,10 @@ public class Company implements Serializable {
 		while(true) {
 			Scanner scnr = new Scanner(System.in);
 			System.out.println("Commands:");
-			System.out.println("1 for reading text file, 2 reading object file, "
-					+ "3 for writing text file, 4 for writing object file, "
-					+ "5 search by ID, 6 search by name, 7 search by department, "
-					+ "8 add an employee, 9 remove an employee 10 print all employees, "
+			System.out.println("1 for reading text file, 2 reading object file,\n"
+					+ "3 for writing text file, 4 for writing object file,\n"
+					+ "5 search by ID, 6 search by name, 7 search by department,\n"
+					+ "8 add an employee, 9 remove an employee 10 print all employees,\n"
 					+ "11 exit.");
 			input = Integer.parseInt(scnr.nextLine());
 			
@@ -296,6 +302,7 @@ public class Company implements Serializable {
 			case 1:
 				try {
 					company.readEmployeeTextFile("employees.txt");
+					System.out.println("Read employees.txt");
 				} catch (IOException e) {
 					System.err.println(e.getMessage());
 					e.printStackTrace();
@@ -304,6 +311,7 @@ public class Company implements Serializable {
 			case 2:
 				try {
 					company.readEmployeeObjectFile("employees-out.ser");
+					System.out.println("Read employees-out.ser");
 				} catch (Exception e) {
 					System.err.println(e.getMessage());
 					e.printStackTrace();
@@ -312,6 +320,7 @@ public class Company implements Serializable {
 			case 3:
 				try {
 					company.writeEmployeeTextFile("employees-out.txt");
+					System.out.println("Wrote employees-out.txt");
 				} catch (IOException e) {
 					System.err.println(e.getMessage());
 					e.printStackTrace();
@@ -320,10 +329,12 @@ public class Company implements Serializable {
 			case 4:
 				try {
 					company.writeEmployeeObjectFile("employees-out.ser");
+					System.out.println("Read employees-out.ser");
 				} catch (IOException e) {
 					System.err.println(e.getMessage());
 					e.printStackTrace();
 				}
+				break;
 			case 5:
 				System.out.println("Enter ID Number:");
 				input = Integer.parseInt(scnr.nextLine());
@@ -347,12 +358,16 @@ public class Company implements Serializable {
 				System.out.println("Enter First Name, Last Name, "
 						+ "ID, Department, and Salary:");
 				String[] info = scnr.nextLine().split(",");
+				try {
 				company.insertEmployee(new Employee(
 						info[0], 
 						info[1], 
 						Integer.parseInt(info[2]),
 						Department.parseDepartment(info[3]),
 						Integer.parseInt(info[4])));
+				} catch (DuplicateEntryException e) {
+					System.err.println(e.getMessage());
+				}
 				break;
 			case 9:
 				System.out.println("Enter ID:");
