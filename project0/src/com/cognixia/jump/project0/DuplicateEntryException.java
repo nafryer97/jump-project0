@@ -7,7 +7,7 @@ package com.cognixia.jump.project0;
  * @author Noah Fryer
  * 
  * Exception thrown when duplicate IDs are inserted into Employee list.
- *
+ * XXX: Custom Exception & Inheritance (extension of Exception Class)
  */
 public class DuplicateEntryException extends Exception {
 

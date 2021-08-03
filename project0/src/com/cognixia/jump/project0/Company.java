@@ -38,6 +38,7 @@ public class Company implements Serializable {
 	 * 
 	 * Enumeration of all the departments in the company. Enables
 	 * easy search and comparison.
+	 * XXX: Nested Class/Enum
 	 */
 	enum Department implements Serializable {
 		INFORMATION_TECHNOLOGY,
@@ -117,6 +118,7 @@ public class Company implements Serializable {
 	 * @return an array containing any entries matched.
 	 */
 	public Object[] searchName(String name) {
+		// XXX: Stream usage
 		Object[] result = this.employees.stream().filter(e -> 
 		e.getFirstName().equalsIgnoreCase(name) 
 		|| e.getLastName().equalsIgnoreCase(name)
@@ -132,6 +134,7 @@ public class Company implements Serializable {
 	 * @return an array containing any entries that matched.
 	 */
 	public Object[] searchDepartment(Department d) {
+		// XXX: Stream usage
 		Object[] result = this.employees.stream().filter(e -> 
 		e.getDepartment() == d
 		).toArray();
@@ -171,6 +174,7 @@ public class Company implements Serializable {
 	 * @param s
 	 */
 	public void insertEmployees(List<Employee> list) {
+		// XXX: DuplicateException usage
 		for (Employee e : list) {
 			try {
 			insertEmployee(e);
@@ -202,6 +206,7 @@ public class Company implements Serializable {
 	 * @throws IOException
 	 */
 	public void writeEmployeeObjectFile(String path) throws IOException {
+		// XXX: File IO -- write object file
 		FileOutputStream file = new FileOutputStream(path);
 		ObjectOutputStream out = new ObjectOutputStream(file);
 		out.writeObject(this);
@@ -218,6 +223,7 @@ public class Company implements Serializable {
 	 * @throws ClassNotFoundException
 	 */
 	public void readEmployeeObjectFile(String path) throws IOException, ClassNotFoundException {
+		// XXX: File IO -- read object file
 		FileInputStream file = new FileInputStream(path);
 		ObjectInputStream in = new ObjectInputStream(file);
 		Company temp = (Company) in.readObject();
@@ -247,6 +253,7 @@ public class Company implements Serializable {
 							Integer.parseInt(tokens[4])
 					));
 			} catch (DuplicateEntryException e) {
+				// XXX: DuplicateException usage
 				System.err.println(e.getMessage());
 			}
 		}
@@ -260,6 +267,7 @@ public class Company implements Serializable {
 	 * @throws IOException
 	 */
 	public void writeEmployeeTextFile(String path) throws IOException {
+		// XXX: File IO -- write text file
 		FileWriter file = new FileWriter(path);
 		BufferedWriter out = new BufferedWriter(file);
 		for (Employee e : this.employees) {
